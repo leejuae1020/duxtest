@@ -1,0 +1,74 @@
+1 :추가하기 버튼을 클릭해도 추가한 아이템이 화면에 표시되지 않음.
+
+- Form.js ===> dispatch()추가
+ -const dispatch = useDispatch();
+
+
+ 카드를 추가하는 action을 dispatch하기위해서는 이 액션을 리듀서로 던져줘야한다. 
+ 추가하기 버튼을 눌렀을 때 추가가 되어야하므로 todo는 todos에 추가 되고 id는 payload를 통해 전달 된다.
+ -(dispatch( addTodo({...todo, id}) );)
+
+ 2. 추가하기 버튼 클릭 후 기존에 존재하던 아이템들이 사라짐.
+
+ - todos.js ===> ADD_TODO case에 추가
+추가한 데이터들이 렌더링되지만 초기화됨.
+기존카드는 유지하되 새로 추가 해주어야한다.
+ADD_TODO case return값에 
+todos: [action.payload] => todos: [...state.todos, action.payload]으로 수정
+
+3.삭제 기능이 동작하지 않음.
+todos.js ===> 리듀서에 DELETE_TODO case 추가수정
+액션까지 생성되었지만 리듀서에 case가 빠져있었다.(추가)
+필터메서드 사용하여 페이로드로 받아온 인자와 일치하지 않는 id를 걸러내삭제함.
+
+-> case DELETE_TODO:
+      return {
+        ...state,
+        todos: state.todos.filter((todo) => todo.id !== action.payload),
+      };
+
+4. 상세 페이지에 진입 하였을 때 데이터가 업데이트 되지 않음.
+(답은 아는데 이해잘 못해서 설명을 못하겠어요 ㅠㅠ)
+
+Detail.jsx -> useEffect 추가
+
+getTodoByID의 액션과 리듀서는 있었지만
+상세페이지  todo-id와 일치하는 값(데이터)를 찾는 부분이 없음
+리듀셔 GET_TODO_BY_ID가 todos의 todo-id와 일치하는 페이로드를 찾는부분이기때문에 액션.페이로드에 받아올 값을 넘겨야함
+컴포넌트가 렌더링 될때마다 동작할수 있도록 useEffect Hook을 사용
+ 의존성배열에 [dispatch, id] 넣어주어
+두개의 인자 상태값을 참조하면서 실행함.,,??
+
+useEffect(() => {
+    dispatch(getTodoByID(id));
+  }, [dispatch, id]);
+
+  5. 완료된 카드의 상세 페이지에 진입 하였을 때 올바른 데이터를 불러오지 못함.
+
+  List.jsx ===> 완료된 카드 Link 수정
+
+  카드마다의 상세내용이 보여지는게아니라 첫번째 카드 상세보기가 나오는 상태
+  map() 인자로 index 받아오는 부분과 상세보기의 Link 또한 index로 되어있었음 인덱스 값으로 되어있기때문에 배열의 첫번째 값이 노출됨
+  상세보기 Link를 각 카드의 아이디로 설정해주면 해당 id의 상세보기로 잘 노출됨
+  수정 전 : todos.map((todo, index) =>) 
+  수정 후 : todos.map((todo) =>)
+
+  수정 전 :<StLink to={/${index}}>
+  수정 후 :<StLink to={/${todo.id}}>
+
+  6.취소 버튼 클릭시 기능이 작동하지 않음
+
+  List.jsx ===> 완료된 카드 취소버튼 수정
+  액션 및 리듀서는 정상이었는데 취소기능이 작동이 안되었다.
+  수정 전 : onClick={onToggleStatusTodo} 
+  수정 후 : onClick={() => onToggleStatusTodo(todo.id)}
+
+    클릭되어진 카드(todo)의 id값이 들어가야 작동 됨
+
+
+
+
+
+
+
+
